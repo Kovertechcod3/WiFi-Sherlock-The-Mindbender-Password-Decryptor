@@ -1,5 +1,6 @@
 import itertools
 import bcrypt
+import argparse
 
 # Configuration
 uppercase_letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -80,11 +81,21 @@ def generate_passwords(length):
     passwords = ("".join(combination) for combination in combinations if check_password_strength("".join(combination)))
     return passwords
 
-if __name__ == "__main__":
-    target_password = b"SuperSecretPassword"
+def main():
+    parser = argparse.ArgumentParser(description='Password Cracking Tool for Telus and Shaw WiFi Networks')
+    parser.add_argument('target_password', type=str, help='Target password to crack')
+    parser.add_argument('--length', type=int, default=10, help='Length of generated passwords')
+
+    args = parser.parse_args()
+
+    target_password = args.target_password.encode()
+
     brute_force_telus_shaw_wifi(target_password)
 
-    # Generate passwords of length 10
-    passwords = generate_passwords(10)
-    for password in passwords:
-        print(password)
+    if args.length:
+        passwords = generate_passwords(args.length)
+        for password in passwords:
+            print(password)
+
+if __name__ == "__main__":
+    main()
