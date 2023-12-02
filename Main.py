@@ -1,5 +1,5 @@
 import itertools
-import bcrypt
+import subprocess
 
 # Configuration
 uppercase_letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -33,11 +33,38 @@ def check_password_strength(password):
         and sum(1 for c in password if c in special_characters) >= MIN_SPECIAL_CHARACTERS
     )
 
-def generate_password_combinations(char_sets, password_length):
-    combinations = itertools.product(*char_sets, repeat=password_length)
-    return itertools.islice(combinations, len(char_sets)**password_length)
+def get_wifi_networks():
+    command = ["nmcli", "-f", "SSID", "device", "wifi", "list"]
+    output = subprocess.run(command, capture_output=True, text=True)
+    output_lines = output.stdout.splitlines()
+    wifi_networks = [line.split()[-1] for line in output_lines[1:]]
+    return wifi_networks
 
-def brute_force_telus_password(target_password):
+def select_wifi_network(wifi_networks):
+    print("Available WiFi Networks:")
+    for i, network in enumerate(wifi_networks, start=1):
+        print(f"{i}. {network}")
+
+    while True:
+        selection = input("Enter the number of the WiFi network you want to crack: ")
+        try:
+            selection_index = int(selection) - 1
+            if selection_index >= 0 and selection_index < len(wifi_networks):
+                return wifi_networks[selection_index]
+            else:
+                print("Invalid selection. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+def main():
+    wifi_networks = get_wifi_networks()
+    if len(wifi_networks) == 0:
+        print("No WiFi networks found. Please make sure your WiFi adapter is enabled.")
+        return
+
+    selected_network = select_wifi_network(wifi_networks)
+    target_password = selected_network.encode()
+
     # Check the default passwords first
     for default_password in DEFAULT_PASSWORDS:
         if bcrypt.checkpw(default_password.encode(), target_password):
@@ -61,5 +88,7 @@ def brute_force_telus_password(target_password):
                 print(f"Success! Password found: {password}")
                 return
 
-target_password = input("Enter the target password: ").encode()
-brute_force_telus_password(target_password)
+    print("Password not found. Keep trying!")
+
+if __name__ == "__main__":
+    main()
