@@ -1,15 +1,34 @@
-# CLI Password Generator
+# SSID-based Password Generator
 
-This is a command-line interface (CLI) tool that generates passwords for different SSID formats. It provides a user-friendly way to generate passwords based on the specific SSID (Wi-Fi network name) provided.
-
-## Requirements
-
-- Python 3.x
+This Python module provides a simple SSID-based password generation logic for Telus routers.
 
 ## Usage
 
-1. Clone the repository or download the `password_generator.py` file to your local machine.
+1. Import the module:
+   ```python
+   from your_module_name import generate_password, add_password_format, InvalidSSIDError, PasswordFormatNotFoundError
 
-2. Open a terminal or command prompt and navigate to the directory where `password_generator.py` is located.
+Generate a password for a given SSID:
+python
+try:
+    password = generate_password("TELUSXXXX")
+    print("Generated password:", password)
+except InvalidSSIDError:
+    print("Invalid SSID.")
+except PasswordFormatNotFoundError:
+    print("No password format found for the given SSID.")
 
-3. Run the following command:
+Add a custom password format for a specific SSID:
+python
+def custom_password_generator():
+    # Add your custom password generation logic here
+    pass
+
+if add_password_format("CUSTOMSSID", custom_password_generator):
+    print("Custom password format added successfully.")
+else:
+    print("Failed to add custom password format.")
+
+Customization
+You can add more Telus router SSID formats and their corresponding password generation logic to the password_formats dictionary in the module.
+Feel free to customize the module to add more features or improve the existing logic.
