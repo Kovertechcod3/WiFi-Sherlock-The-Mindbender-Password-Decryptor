@@ -12,10 +12,8 @@ class PasswordFormatNotFoundError(Exception):
 
 # Dictionary mapping SSID formats to their corresponding password generation logic
 password_formats = {
-    "2WIREXXX": lambda: str(random.randint(0, 9999999999)).zfill(10),
-    "3MobileWiFi": lambda: ''.join(random.choice("0123456789abcdefghijklmnopqrstuvwxyz") for _ in range(8)),
-    "3Wireless-Modem-XXXX": lambda: '{:04x}'.format(random.randint(0, 65535)),
-    # Add more SSID formats and their corresponding password generation logic here
+    "TELUSXXXX": lambda: ''.join(random.choice("0123456789") for _ in range(4)),
+    # Add more Telus router SSID formats and their corresponding password generation logic here
 }
 
 def generate_password(ssid):
@@ -41,7 +39,7 @@ def add_password_format(ssid, password_generator):
         return False
 
 # Testing the code
-ssid = input("Enter the SSID: ")
+ssid = input("Enter the Telus router SSID: ")
 try:
     password = generate_password(ssid)
     print("Generated password:", password)
