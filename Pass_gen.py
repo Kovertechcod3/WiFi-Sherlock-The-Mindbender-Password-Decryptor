@@ -1,74 +1,51 @@
 import random
-import argparse
+
+class InvalidSSIDError(Exception):
+    def __init__(self, message="Invalid SSID."):
+        self.message = message
+        super().__init__(self.message)
+
+class PasswordFormatNotFoundError(Exception):
+    def __init__(self, message="No password format found for the given SSID."):
+        self.message = message
+        super().__init__(self.message)
+
+# Dictionary mapping SSID formats to their corresponding password generation logic
+password_formats = {
+    "2WIREXXX": lambda: str(random.randint(0, 9999999999)).zfill(10),
+    "3MobileWiFi": lambda: ''.join(random.choice("0123456789abcdefghijklmnopqrstuvwxyz") for _ in range(8)),
+    "3Wireless-Modem-XXXX": lambda: '{:04x}'.format(random.randint(0, 65535)),
+    # Add more SSID formats and their corresponding password generation logic here
+}
 
 def generate_password(ssid):
-    if ssid == "2WIREXXX":
-        return str(random.randint(0, 9999999999)).zfill(10)
-    elif ssid == "3MobileWiFi":
-        characters = "0123456789abcdefghijklmnopqrstuvwxyz"
-        return ''.join(random.choice(characters) for _ in range(8))
-    elif ssid == "3Wireless-Modem-XXXX":
-        return '{:04x}'.format(random.randint(0, 65535))
-    elif ssid == "Alice_XXXXXXXX":
-        characters = "0123456789abcdefghijklmnopqrstuvwxyz"
-        return ''.join(random.choice(characters) for _ in range(24))
-    elif ssid == "AOLBB-XXXXXX":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(8))
-    elif ssid == "ATT###":
-        return str(random.randint(0, 9999999999)).zfill(10)
-    elif ssid == "ATTxxxx 0000":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(10))
-    elif ssid == "ATTxxxxxxx":
-        characters = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+"
-        return ''.join(random.choice(characters) for _ in range(12))
-    elif ssid == "belkin.xxx":
-        characters = "23456789abcdef"
-        return ''.join(random.choice(characters) for _ in range(8))
-    elif ssid == "belkin.xxxx":
-        return '{:04x}'.format(random.randint(0, 65535))
-    elif ssid == "Belkin.XXXX":
-        return '{:04X}'.format(random.randint(0, 65535))
-    elif ssid == "Belkin_XXXXXX":
-        return '{:06X}'.format(random.randint(0, 16777215))
-    elif ssid == "BTHub3-XXXX":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(10))
-    elif ssid == "BTHub4-XXXX":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(10))
-    elif ssid == "BTHub5-XXXX":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(10))
-    elif ssid == "BTHub6-XXXX":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(10))
-    elif ssid == "D-Link-XXXX":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(8))
-    elif ssid == "DLink-XXXX":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(8))
-    elif ssid == "EircomXXXXXXX":
-        characters = "0123456789abcdefghijklmnopqrstuvwxyz"
-        return ''.join(random.choice(characters) for _ in range(10))
-    elif ssid == "HH3A-XXXX":
-        characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        return ''.join(random.choice(characters) for _ in range(8))
+    if isinstance(ssid, str) and ssid.strip():
+        if ssid in password_formats:
+            return password_formats[ssid]()
+        else:
+            raise PasswordFormatNotFoundError
     else:
-        return "No password format found for the given SSID."
+        raise InvalidSSIDError
 
-def main():
-    parser = argparse.ArgumentParser(description='Password Generator for different SSID formats')
-    parser.add_argument('ssid', type=str, help='SSID name')
-    args = parser.parse_args()
+def add_password_format(ssid, password_generator):
+    if isinstance(ssid, str) and ssid.strip() and callable(password_generator):
+        # Enforce password constraints
+        def password_wrapper():
+            password = password_generator()
+            # Add any additional password constraints here
+            return password
 
-    password = generate_password(args.ssid)
-    if password.startswith("No password format"):
-        print(password)
+        password_formats[ssid] = password_wrapper
+        return True
     else:
-        print("Generated Password:", password)
+        return False
 
-if __name__ == "__main__":
-    main()
+# Testing the code
+ssid = input("Enter the SSID: ")
+try:
+    password = generate_password(ssid)
+    print("Generated password:", password)
+except InvalidSSIDError:
+    print("Invalid SSID.")
+except PasswordFormatNotFoundError:
+    print("No password format found for the given SSID.")
